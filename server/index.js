@@ -25,32 +25,41 @@ const typeDefs = `#graphql
   }
 
   type Query {
-    getAllPerfumes: [PerfumeProduct]
+    getAllPerfumes(gender: Gender!): [PerfumeProduct]
   }
 `;
 
 const resolvers = {
   Query: {
-    getAllPerfumes: () => query.getAll(),
+    getAllPerfumes: async (_, { gender }) => {
+      console.log("Gender:", gender);
+      try {
+        const perfumes = await query.getAll({ gender });
+        return perfumes;
+      } catch (error) {
+        console.error("Error fetching perfumes:", error);
+        throw new Error("Failed to fetch perfumes");
+      }
+    },
   },
 
   PerfumeProduct: {
     perfume: (parent, args) => {
       const size = args.size;
-      console.log("Perfume:", parent.perfume[size]); 
-      return parent.perfume?.[size] || null;
+      console.log("Perfume:", parent.perfume[size]);
+      return parent.perfume[size];
     },
     eauDeParfume: (parent, args) => {
       const size = args.size;
-      console.log("Eau De Parfum:", parent.eauDeParfume[size]);  
-      return parent.eauDeParfume?.[size] || null;
+      console.log("Eau De Parfum:", parent.eauDeParfume[size]);
+      return parent.eauDeParfume[size];
     },
     toitlette: (parent, args) => {
       const size = args.size;
-      console.log("Toilette:", parent.toitlette[size]);  
-      return parent.toitlette?.[size] || null;
+      console.log("Toilette:", parent.toitlette[size]);
+      return parent.toitlette[size];
     },
-  }
+  },
 };
 
 const server = new ApolloServer({
